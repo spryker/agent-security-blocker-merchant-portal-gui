@@ -73,12 +73,6 @@ class SecurityBlockerAgentMerchantPortalEventSubscriber implements EventSubscrib
      */
     protected MessageBuilderInterface $messageBuilder;
 
-    /**
-     * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
-     * @param \Spryker\Zed\AgentSecurityBlockerMerchantPortalGui\Dependency\Client\AgentSecurityBlockerMerchantPortalGuiToSecurityBlockerClientInterface $securityBlockerClient
-     * @param \Spryker\Zed\AgentSecurityBlockerMerchantPortalGui\Communication\Builder\MessageBuilderInterface $messageBuilder
-     * @param \Spryker\Zed\AgentSecurityBlockerMerchantPortalGui\AgentSecurityBlockerMerchantPortalGuiConfig $agentSecurityBlockerMerchantPortalGuiConfig
-     */
     public function __construct(
         RequestStack $requestStack,
         AgentSecurityBlockerMerchantPortalGuiToSecurityBlockerClientInterface $securityBlockerClient,
@@ -108,9 +102,6 @@ class SecurityBlockerAgentMerchantPortalEventSubscriber implements EventSubscrib
         return $subscribedEvents;
     }
 
-    /**
-     * @return void
-     */
     public function onAuthenticationFailure(): void
     {
         $request = $this->requestStack->getCurrentRequest();
@@ -156,11 +147,6 @@ class SecurityBlockerAgentMerchantPortalEventSubscriber implements EventSubscrib
         );
     }
 
-    /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     *
-     * @return bool
-     */
     protected function isLoginAttempt(Request $request): bool
     {
         $currentRoute = $request->attributes->get(static::ROUTE_KEY);
@@ -170,11 +156,6 @@ class SecurityBlockerAgentMerchantPortalEventSubscriber implements EventSubscrib
             && $request->getMethod() === Request::METHOD_POST;
     }
 
-    /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     *
-     * @return \Generated\Shared\Transfer\SecurityCheckAuthContextTransfer
-     */
     protected function createSecurityCheckAuthContextTransfer(Request $request): SecurityCheckAuthContextTransfer
     {
         return (new SecurityCheckAuthContextTransfer())

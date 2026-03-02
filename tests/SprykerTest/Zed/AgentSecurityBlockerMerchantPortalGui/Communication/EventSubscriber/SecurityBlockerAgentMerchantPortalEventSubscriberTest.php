@@ -71,9 +71,6 @@ class SecurityBlockerAgentMerchantPortalEventSubscriberTest extends Unit
      */
     protected RequestStack $requestStackMock;
 
-    /**
-     * @return void
-     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -83,9 +80,6 @@ class SecurityBlockerAgentMerchantPortalEventSubscriberTest extends Unit
         $this->subscriber = $this->createSecurityBlockerAgentMerchantPortalEventSubscriber();
     }
 
-    /**
-     * @return void
-     */
     public function testSecurityBlockerAgentMerchantPortalEventSubscriberShouldCallAgentSecurityBlockerClientOnKernalReqeustWhileSendingValidLoginAttempt(): void
     {
         // Arrange
@@ -105,9 +99,6 @@ class SecurityBlockerAgentMerchantPortalEventSubscriberTest extends Unit
         $eventDispatcher->dispatch($event, KernelEvents::REQUEST);
     }
 
-    /**
-     * @return void
-     */
     public function testSecurityBlockerAgentMerchantPortalEventSubscriberShouldThrowHttpExceptionWhileSendingBlockedLoginAttempt(): void
     {
         // Arrange
@@ -128,9 +119,6 @@ class SecurityBlockerAgentMerchantPortalEventSubscriberTest extends Unit
         $eventDispatcher->dispatch($event, KernelEvents::REQUEST);
     }
 
-    /**
-     * @return void
-     */
     public function testSecurityBlockerAgentMerchantPortalEventSubscriberShouldNotCallAgentSecurityBlockerClientWhileSendingWrongRequest(): void
     {
         // Arrange
@@ -150,9 +138,6 @@ class SecurityBlockerAgentMerchantPortalEventSubscriberTest extends Unit
         $eventDispatcher->dispatch($event, KernelEvents::REQUEST);
     }
 
-    /**
-     * @return void
-     */
     public function testSecurityBlockerAgentMerchantPortalEventSubscriberShouldReturnAgentSecurityBlockerClientExceptionWhileFailedLoginAttempt(): void
     {
         // Arrange
@@ -173,9 +158,6 @@ class SecurityBlockerAgentMerchantPortalEventSubscriberTest extends Unit
         $eventDispatcher->dispatch($event, LoginFailureEvent::class);
     }
 
-    /**
-     * @return void
-     */
     public function testSecurityBlockerAgentMerchantPortalEventSubscriberShouldNotCallAgentSecurityBlockerClientWhileSendingValidGetRequest(): void
     {
         // Arrange
@@ -196,12 +178,6 @@ class SecurityBlockerAgentMerchantPortalEventSubscriberTest extends Unit
         $eventDispatcher->dispatch($event, LoginFailureEvent::class);
     }
 
-    /**
-     * @param \Generated\Shared\Transfer\SecurityCheckAuthContextTransfer $securityCheckAuthContextTransfer
-     * @param string $requestMethod
-     *
-     * @return \Symfony\Component\HttpKernel\Event\RequestEvent
-     */
     protected function createRequestEventForMethod(
         SecurityCheckAuthContextTransfer $securityCheckAuthContextTransfer,
         string $requestMethod
@@ -228,9 +204,6 @@ class SecurityBlockerAgentMerchantPortalEventSubscriberTest extends Unit
         return $this->createMock(AgentSecurityBlockerMerchantPortalGuiToSecurityBlockerClientInterface::class);
     }
 
-    /**
-     * @return \Spryker\Zed\AgentSecurityBlockerMerchantPortalGui\Communication\EventSubscriber\SecurityBlockerAgentMerchantPortalEventSubscriber
-     */
     protected function createSecurityBlockerAgentMerchantPortalEventSubscriber(): SecurityBlockerAgentMerchantPortalEventSubscriber
     {
         return new SecurityBlockerAgentMerchantPortalEventSubscriber(

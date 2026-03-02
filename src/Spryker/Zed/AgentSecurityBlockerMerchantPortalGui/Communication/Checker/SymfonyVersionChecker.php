@@ -14,9 +14,6 @@ use Symfony\Component\Security\Core\Authentication\AuthenticationProviderManager
  */
 class SymfonyVersionChecker
 {
-    /**
-     * @return bool
-     */
     public static function isSymfonyVersion5(): bool
     {
         return class_exists(AuthenticationProviderManager::class);

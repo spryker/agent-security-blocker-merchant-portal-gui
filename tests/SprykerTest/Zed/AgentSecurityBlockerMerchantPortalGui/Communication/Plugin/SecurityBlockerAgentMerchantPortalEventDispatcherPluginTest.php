@@ -39,9 +39,6 @@ class SecurityBlockerAgentMerchantPortalEventDispatcherPluginTest extends Unit
      */
     protected SecurityBlockerAgentMerchantPortalEventDispatcherPlugin $securityBlockerAgentMerchantPortalEventDispatcherPlugin;
 
-    /**
-     * @return void
-     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -57,9 +54,6 @@ class SecurityBlockerAgentMerchantPortalEventDispatcherPluginTest extends Unit
         $this->securityBlockerAgentMerchantPortalEventDispatcherPlugin->setFactory($agentSecurityBlockerMerchantPortalGuiFactoryMock);
     }
 
-    /**
-     * @return void
-     */
     public function testSecurityBlockerAgentMerchantPortalEventDispatcherPluginShouldCallAddSubscriberOnEventDispatcher(): void
     {
         // Arrange
