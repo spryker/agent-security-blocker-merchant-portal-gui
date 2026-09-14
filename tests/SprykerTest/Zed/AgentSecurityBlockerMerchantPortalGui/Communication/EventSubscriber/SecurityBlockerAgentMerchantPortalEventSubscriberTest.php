@@ -185,7 +185,7 @@ class SecurityBlockerAgentMerchantPortalEventSubscriberTest extends Unit
         $httpKernel = $this->getMockBuilder(HttpKernelInterface::class)->getMock();
         $request = $this->tester->createRequest($requestMethod, $securityCheckAuthContextTransfer);
 
-        return new RequestEvent($httpKernel, $request, HttpKernelInterface::MASTER_REQUEST);
+        return new RequestEvent($httpKernel, $request, $this->getMainRequestType());
     }
 
     /**
@@ -218,5 +218,10 @@ class SecurityBlockerAgentMerchantPortalEventSubscriberTest extends Unit
                 ],
             ),
         );
+    }
+
+    protected function getMainRequestType(): int
+    {
+        return HttpKernelInterface::MAIN_REQUEST;
     }
 }
