@@ -34,6 +34,13 @@ class AgentSecurityBlockerMerchantPortalGuiDependencyProvider extends AbstractBu
      */
     public const SERVICE_REQUEST_STACK = 'request_stack';
 
+    public const string FACADE_MESSENGER = 'FACADE_MESSENGER';
+
+    /**
+     * @uses \Spryker\Zed\ZedUi\Communication\Plugin\Application\ZedUiApplicationPlugin::SERVICE_ZED_UI_FACTORY
+     */
+    public const string SERVICE_ZED_UI_FACTORY = 'SERVICE_ZED_UI_FACTORY';
+
     /**
      * @uses \Spryker\Zed\Locale\Communication\Plugin\Application\LocaleApplicationPlugin::SERVICE_LOCALE
      *
@@ -48,6 +55,8 @@ class AgentSecurityBlockerMerchantPortalGuiDependencyProvider extends AbstractBu
         $container = $this->addAgentSecurityBlockerClient($container);
         $container = $this->addGlossaryFacade($container);
         $container = $this->addRequestStack($container);
+        $container = $this->addMessengerFacade($container);
+        $container = $this->addZedUiFactory($container);
         $container = $this->addLocaleService($container);
 
         return $container;
@@ -88,6 +97,29 @@ class AgentSecurityBlockerMerchantPortalGuiDependencyProvider extends AbstractBu
     {
         $container->set(static::SERVICE_LOCALE, function (Container $container) {
             return $container->getApplicationService(static::SERVICE_LOCALE);
+        });
+
+        return $container;
+    }
+
+    protected function addMessengerFacade(Container $container): Container
+    {
+        $container->set(static::FACADE_MESSENGER, function (Container $container) {
+            return $container->getLocator()->messenger()->facade();
+        });
+
+        return $container;
+    }
+
+    protected function addZedUiFactory(Container $container): Container
+    {
+        $container->set(static::SERVICE_ZED_UI_FACTORY, function (Container $container) {
+            // The subscriber is also registered in the Back Office application, which provides no ZedUi factory.
+            if (!$container->hasApplicationService(static::SERVICE_ZED_UI_FACTORY)) {
+                return null;
+            }
+
+            return $container->getApplicationService(static::SERVICE_ZED_UI_FACTORY);
         });
 
         return $container;

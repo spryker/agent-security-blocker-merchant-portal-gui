@@ -8,13 +8,17 @@
 namespace SprykerTest\Zed\AgentSecurityBlockerMerchantPortalGui\Communication\Plugin;
 
 use Codeception\Test\Unit;
+use InvalidArgumentException;
+use PHPUnit\Framework\MockObject\MockObject;
 use Spryker\Service\Container\ContainerInterface;
 use Spryker\Shared\EventDispatcher\EventDispatcherInterface;
+use Spryker\Zed\AgentSecurityBlockerMerchantPortalGui\AgentSecurityBlockerMerchantPortalGuiConfig;
 use Spryker\Zed\AgentSecurityBlockerMerchantPortalGui\AgentSecurityBlockerMerchantPortalGuiDependencyProvider;
 use Spryker\Zed\AgentSecurityBlockerMerchantPortalGui\Communication\AgentSecurityBlockerMerchantPortalGuiCommunicationFactory;
 use Spryker\Zed\AgentSecurityBlockerMerchantPortalGui\Communication\Plugin\EventDispatcher\SecurityBlockerAgentMerchantPortalEventDispatcherPlugin;
 use Spryker\Zed\Kernel\Container;
 use SprykerTest\Zed\AgentSecurityBlockerMerchantPortalGui\AgentSecurityBlockerMerchantPortalGuiCommunicationTester;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Auto-generated group annotations
@@ -29,14 +33,10 @@ use SprykerTest\Zed\AgentSecurityBlockerMerchantPortalGui\AgentSecurityBlockerMe
  */
 class SecurityBlockerAgentMerchantPortalEventDispatcherPluginTest extends Unit
 {
-    /**
-     * @var \SprykerTest\Zed\AgentSecurityBlockerMerchantPortalGui\AgentSecurityBlockerMerchantPortalGuiCommunicationTester
-     */
+    protected const string UNKNOWN_LOGIN_PROTECTION_STRATEGY = 'unknown';
+
     protected AgentSecurityBlockerMerchantPortalGuiCommunicationTester $tester;
 
-    /**
-     * @var \Spryker\Zed\AgentSecurityBlockerMerchantPortalGui\Communication\Plugin\EventDispatcher\SecurityBlockerAgentMerchantPortalEventDispatcherPlugin
-     */
     protected SecurityBlockerAgentMerchantPortalEventDispatcherPlugin $securityBlockerAgentMerchantPortalEventDispatcherPlugin;
 
     protected function setUp(): void
@@ -68,5 +68,72 @@ class SecurityBlockerAgentMerchantPortalEventDispatcherPluginTest extends Unit
             $eventDispatcherMock,
             $this->createMock(ContainerInterface::class),
         );
+    }
+
+    public function testPluginAddsTheIpOnlySubscriberForTheIpLoginProtectionStrategy(): void
+    {
+        // Arrange
+        $eventSubscriber = $this->createMock(EventSubscriberInterface::class);
+        $agentSecurityBlockerMerchantPortalGuiFactoryMock = $this->createFactoryMock(AgentSecurityBlockerMerchantPortalGuiConfig::LOGIN_PROTECTION_STRATEGY_IP);
+        $agentSecurityBlockerMerchantPortalGuiFactoryMock->method('createSecurityBlockerAgentMerchantPortalEventSubscriber')->willReturn($eventSubscriber);
+        $eventDispatcherMock = $this->createMock(EventDispatcherInterface::class);
+
+        // Assert
+        $agentSecurityBlockerMerchantPortalGuiFactoryMock->expects($this->never())->method('createSecurityBlockerAgentMerchantPortalLoginEventSubscriber');
+        $eventDispatcherMock->expects($this->once())->method('addSubscriber')->with($this->identicalTo($eventSubscriber));
+
+        // Act
+        $this->createPlugin($agentSecurityBlockerMerchantPortalGuiFactoryMock)->extend($eventDispatcherMock, $this->createMock(ContainerInterface::class));
+    }
+
+    public function testPluginAddsTheLoginSubscriberForTheIpAndAccountLoginProtectionStrategy(): void
+    {
+        // Arrange
+        $eventSubscriber = $this->createMock(EventSubscriberInterface::class);
+        $agentSecurityBlockerMerchantPortalGuiFactoryMock = $this->createFactoryMock(AgentSecurityBlockerMerchantPortalGuiConfig::LOGIN_PROTECTION_STRATEGY_IP_AND_ACCOUNT);
+        $agentSecurityBlockerMerchantPortalGuiFactoryMock->method('createSecurityBlockerAgentMerchantPortalLoginEventSubscriber')->willReturn($eventSubscriber);
+        $eventDispatcherMock = $this->createMock(EventDispatcherInterface::class);
+
+        // Assert
+        $agentSecurityBlockerMerchantPortalGuiFactoryMock->expects($this->never())->method('createSecurityBlockerAgentMerchantPortalEventSubscriber');
+        $eventDispatcherMock->expects($this->once())->method('addSubscriber')->with($this->identicalTo($eventSubscriber));
+
+        // Act
+        $this->createPlugin($agentSecurityBlockerMerchantPortalGuiFactoryMock)->extend($eventDispatcherMock, $this->createMock(ContainerInterface::class));
+    }
+
+    public function testPluginFailsForALoginProtectionStrategyWithoutARegisteredSubscriber(): void
+    {
+        // Arrange
+        $agentSecurityBlockerMerchantPortalGuiFactoryMock = $this->createFactoryMock(static::UNKNOWN_LOGIN_PROTECTION_STRATEGY);
+
+        // Expect
+        $this->expectException(InvalidArgumentException::class);
+
+        // Act
+        $this->createPlugin($agentSecurityBlockerMerchantPortalGuiFactoryMock)->extend($this->createMock(EventDispatcherInterface::class), $this->createMock(ContainerInterface::class));
+    }
+
+    protected function createFactoryMock(string $loginProtectionStrategy): AgentSecurityBlockerMerchantPortalGuiCommunicationFactory&MockObject
+    {
+        $agentSecurityBlockerMerchantPortalGuiConfigMock = $this->createPartialMock(AgentSecurityBlockerMerchantPortalGuiConfig::class, ['getLoginProtectionStrategy']);
+        $agentSecurityBlockerMerchantPortalGuiConfigMock->method('getLoginProtectionStrategy')->willReturn($loginProtectionStrategy);
+
+        $agentSecurityBlockerMerchantPortalGuiFactoryMock = $this->createPartialMock(AgentSecurityBlockerMerchantPortalGuiCommunicationFactory::class, [
+            'createSecurityBlockerAgentMerchantPortalEventSubscriber',
+            'createSecurityBlockerAgentMerchantPortalLoginEventSubscriber',
+        ]);
+        $agentSecurityBlockerMerchantPortalGuiFactoryMock->setConfig($agentSecurityBlockerMerchantPortalGuiConfigMock);
+
+        return $agentSecurityBlockerMerchantPortalGuiFactoryMock;
+    }
+
+    protected function createPlugin(
+        AgentSecurityBlockerMerchantPortalGuiCommunicationFactory $agentSecurityBlockerMerchantPortalGuiCommunicationFactory
+    ): SecurityBlockerAgentMerchantPortalEventDispatcherPlugin {
+        $securityBlockerAgentMerchantPortalEventDispatcherPlugin = new SecurityBlockerAgentMerchantPortalEventDispatcherPlugin();
+        $securityBlockerAgentMerchantPortalEventDispatcherPlugin->setFactory($agentSecurityBlockerMerchantPortalGuiCommunicationFactory);
+
+        return $securityBlockerAgentMerchantPortalEventDispatcherPlugin;
     }
 }

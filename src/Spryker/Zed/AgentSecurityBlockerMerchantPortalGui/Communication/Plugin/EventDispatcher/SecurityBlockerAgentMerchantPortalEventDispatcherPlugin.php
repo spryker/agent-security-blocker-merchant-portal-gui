@@ -22,6 +22,10 @@ class SecurityBlockerAgentMerchantPortalEventDispatcherPlugin extends AbstractPl
      * {@inheritDoc}
      * - Adds a listener to log the failed merchant portal agent login attempts.
      * - Denies agent access in case of exceeding the limit.
+     * - Adds the listeners of the login protection strategy {@link \Spryker\Zed\AgentSecurityBlockerMerchantPortalGui\AgentSecurityBlockerMerchantPortalGuiConfig::getLoginProtectionStrategy()}
+     *   selects, by default the per-IP ones above.
+     * - With the `ip-and-account` strategy, failed logins also lock the account regardless of the source IP.
+     * - Throws an exception when no strategy is registered for the selected key.
      *
      * @api
      *
@@ -35,7 +39,7 @@ class SecurityBlockerAgentMerchantPortalEventDispatcherPlugin extends AbstractPl
         ContainerInterface $container
     ): EventDispatcherInterface {
         $eventDispatcher->addSubscriber(
-            $this->getFactory()->createSecurityBlockerAgentMerchantPortalEventSubscriber(),
+            $this->getFactory()->createLoginProtectionEventSubscriber(),
         );
 
         return $eventDispatcher;
